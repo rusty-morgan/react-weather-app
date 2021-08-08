@@ -1,48 +1,73 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import Context from "../context";
-import axios from "axios";
+
+import "./Home.scss";
+import { WeatherIcon } from "../components/WeatherIcon";
+import { CircularProgress } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
+
+import { convertTime } from "../helpers/ConvertTimeStamp";
+
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  alert: {
+    textAlign: "left",
+    margin: "-3em auto 4em",
+  },
+}));
 
 export const Home = () => {
-  const { mainState, setMainState } = useContext(Context);
-  const [city, setCity] = useState(mainState.location);
-  const [weather, setWeather] = useState({});
+  const { weather, errors, cityData, loading } = useContext(Context);
+  const classes = useStyles();
 
-  const apiURL = process.env.REACT_APP_WEATHER_BASE_URL;
-  const weatherAPIKey = process.env.REACT_APP_WEATHER_API_KEY;
+  const { alerts } = weather;
 
-  const onSubmit = (event) => {
-    event.preventDefault();
-    if (!city) return;
+  return loading ? (
+    <CircularProgress color="secondary" />
+  ) : (
+    <div className="weather-result">
+      {Object.keys(weather).length !== 0 ? (
+        <>
+          {alerts
+            ? alerts.map((data, key) => {
+                return (
+                  <Alert
+                    className={classes.alert}
+                    key={key}
+                    variant="filled"
+                    severity="warning"
+                  >
+                    <AlertTitle>
+                      {data.event}{" "}
+                      <small>
+                        {`(${convertTime(data.start)} - ${convertTime(
+                          data.end
+                        )})`}
+                      </small>
+                    </AlertTitle>
+                    <p>{data.description}</p>
+                    <small>{data.sender_name}</small>
+                  </Alert>
+                );
+              })
+            : null}
 
-    setMainState({ location: city, lang: mainState.lang });
-    fetchWeather(city);
-  };
+          <h3 className="location">
+            {`${cityData.results[0].formatted}`}
+            {/* {`${cityData.results[0].components.city}, ${cityData.results[0].components.city_district}, ${cityData.results[0].components.country}`} */}
+          </h3>
+          <div className="temp">{Math.round(weather.current.temp)}°C</div>
 
-  const fetchWeather = async (city) => {
-    try {
-      const res = await axios.get(
-        `${apiURL}weather?q=${city}&appid=${weatherAPIKey}&units=metric&lang=${mainState.lang}`
-      );
-      const watherData = res.data;
+          <WeatherIcon data={weather.current.weather} />
 
-      setCity(watherData.name);
-      setWeather(watherData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <div>
-      <form onSubmit={onSubmit}>
-        <input
-          type="text"
-          value={city}
-          onChange={(event) => setCity(event.target.value)}
-        />
-        <input type="submit" value="Search" />
-      </form>
-      <pre>{JSON.stringify(weather, null, 2)}</pre>
+          <p className="description">
+            {weather.current.weather[0].description}
+          </p>
+        </>
+      ) : errors ? (
+        <p className="description">{errors}</p>
+      ) : null}
     </div>
   );
 };

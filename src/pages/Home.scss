@@ -1,0 +1,39 @@
+.search-weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5em 0;
+  .root {
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    width: 400px;
+  }
+  .search-input {
+    margin-left: 15px;
+    flex: 1;
+  }
+}
+.weather-result {
+  text-align: center;
+  color: #fff;
+  .location {
+    font-size: 3em;
+    margin: 0;
+    font-weight: 100;
+  }
+  .temp {
+    font-size: 5em;
+    font-weight: bold;
+  }
+  .description {
+    text-transform: capitalize;
+    font-size: 2em;
+    margin: 0;
+  }
+  .icon {
+    max-width: 100px;
+    width: 100%;
+    filter: invert(1);
+  }
+}
